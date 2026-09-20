@@ -1,0 +1,20 @@
+backend:
+  name: github
+  repo: eduardowke/duda-artes
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "artes"
+    label: "Obras de Arte"
+    folder: "src/content/artes"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título da Obra", name: "title", widget: "string" }
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "Imagem da Arte", name: "image", widget: "image" }
+      - { label: "Técnica / Estilo", name: "style", widget: "string", required: false }
+      - { label: "Descrição / História da Obra", name: "body", widget: "markdown" }

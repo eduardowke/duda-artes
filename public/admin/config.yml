@@ -1,7 +1,10 @@
+#Tentativa 2
 backend:
   name: github
   repo: eduardowke/duda-artes
   branch: main
+  base_url: https://decap-cms-oauth.vercel.app
+  auth_endpoint: /auth
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

@@ -1,15 +1,113 @@
 ---
-/* Rota nativa do Astro para carregar o Decap CMS */
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+// Busca todas as obras cadastradas na pasta src/content/artes/
+const todasArtes = await getCollection('artes');
+
+// Ordena as obras por data (da mais recente para a mais antiga)
+const artesOrdenadas = todasArtes.sort((a, b) => 
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
 ---
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel de Controle | Duda Artes</title>
-  </head>
-  <body>
-    <!-- Script do Decap CMS -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  </body>
-</html>
+
+<Layout title="Duda Sobrinho | Portfólio de Arte">
+  <main class="container">
+    <header class="hero">
+      <h1>Duda Sobrinho</h1>
+      <p>Galeria de Obras e Produções Artísticas</p>
+    </header>
+
+    <section class="galeria">
+      {artesOrdenadas.length === 0 ? (
+        <p class="mensagem-vazia">Nenhuma obra cadastrada ainda. Cadastre uma obra pelo painel <a href="/admin/">/admin</a>.</p>
+      ) : (
+        artesOrdenadas.map((arte) => (
+          <article class="card-arte">
+            <div class="imagem-container">
+              <img src={arte.data.image} alt={arte.data.title} loading="lazy" />
+            </div>
+            <div class="info-arte">
+              <h2>{arte.data.title}</h2>
+              {arte.data.style && <span class="estilo">{arte.data.style}</span>}
+            </div>
+          </article>
+        ))
+      )}
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: system-ui, sans-serif;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .card-arte {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    transition: transform 0.2s ease;
+  }
+
+  .card-arte:hover {
+    transform: translateY(-4px);
+  }
+
+  .imagem-container {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+  }
+
+  .imagem-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .info-arte {
+    padding: 1rem;
+  }
+
+  .info-arte h2 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .estilo {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: #666;
+    background-color: #eee;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .mensagem-vazia {
+    text-align: center;
+    grid-column: 1 / -1;
+    color: #666;
+  }
+</style>

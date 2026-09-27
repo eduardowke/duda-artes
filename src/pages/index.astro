@@ -1,113 +1,252 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
 
-// Busca todas as obras cadastradas na pasta src/content/artes/
-const todasArtes = await getCollection('artes');
-
-// Ordena as obras por data (da mais recente para a mais antiga)
-const artesOrdenadas = todasArtes.sort((a, b) => 
-  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-);
+const artes = await getCollection('artes');
 ---
 
-<Layout title="Duda Sobrinho | Portfólio de Arte">
-  <main class="container">
-    <header class="hero">
-      <h1>Duda Sobrinho</h1>
-      <p>Galeria de Obras e Produções Artísticas</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Art Sobrinho | Portfólio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  </head>
+  <body>
+
+    <!-- CABEÇALHO COM A LOGO -->
+    <header class="header">
+      <div class="logo-container">
+        <!-- Substitua pelo caminho da sua imagem da logo quando enviar para public/uploads/logo.png -->
+        <img src="/uploads/logo.png" alt="Art Sobrinho" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';" />
+        <h1 id="fallback-title" class="fallback-title" style="display: none;">art.sobrinho</h1>
+      </div>
     </header>
 
-    <section class="galeria">
-      {artesOrdenadas.length === 0 ? (
-        <p class="mensagem-vazia">Nenhuma obra cadastrada ainda. Cadastre uma obra pelo painel <a href="/admin/">/admin</a>.</p>
-      ) : (
-        artesOrdenadas.map((arte) => (
-          <article class="card-arte">
-            <div class="imagem-container">
+    <!-- GALERIA DE OBRAS -->
+    <main class="container">
+      <div class="gallery-grid">
+        {artes.map((arte) => (
+          <article class="art-card" onclick={`openModal('${arte.data.image}', '${arte.data.title}', '${arte.data.style || ''}')`}>
+            <div class="image-wrapper">
               <img src={arte.data.image} alt={arte.data.title} loading="lazy" />
+              <div class="overlay">
+                <span>Clique para ampliar 🔍</span>
+              </div>
             </div>
-            <div class="info-arte">
-              <h2>{arte.data.title}</h2>
-              {arte.data.style && <span class="estilo">{arte.data.style}</span>}
+            <div class="card-content">
+              <h3>{arte.data.title}</h3>
+              {arte.data.style && <span class="badge">{arte.data.style}</span>}
             </div>
           </article>
-        ))
-      )}
-    </section>
-  </main>
-</Layout>
+        ))}
+      </div>
+    </main>
 
-<style>
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    font-family: system-ui, sans-serif;
-  }
+    <!-- MODAL DE ZOOM (LIGHTBOX) -->
+    <div id="image-modal" class="modal" onclick="closeModal()">
+      <span class="close-btn">&times;</span>
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <img id="modal-img" src="" alt="" />
+        <div class="modal-caption">
+          <h2 id="modal-title"></h2>
+          <p id="modal-style"></p>
+        </div>
+      </div>
+    </div>
 
-  .hero {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
+    <!-- ESTILOS VISUAIS -->
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --accent-color: #333333;
+        --radius: 12px;
+      }
 
-  .hero h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-  }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  .galeria {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-  }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        padding-bottom: 60px;
+      }
 
-  .card-arte {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: #fff;
-    transition: transform 0.2s ease;
-  }
+      /* Header & Logo */
+      .header {
+        text-align: center;
+        padding: 40px 20px 20px;
+      }
 
-  .card-arte:hover {
-    transform: translateY(-4px);
-  }
+      .logo-img {
+        max-width: 250px;
+        height: auto;
+        display: inline-block;
+      }
 
-  .imagem-container {
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-    background-color: #f0f0f0;
-  }
+      .fallback-title {
+        font-weight: 300;
+        letter-spacing: 2px;
+        font-size: 2rem;
+      }
 
-  .imagem-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+      /* Grid Layout */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
 
-  .info-arte {
-    padding: 1rem;
-  }
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+      }
 
-  .info-arte h2 {
-    font-size: 1.25rem;
-    margin: 0 0 0.5rem 0;
-  }
+      /* Cards com Sombra e Efeitos */
+      .art-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
 
-  .estilo {
-    display: inline-block;
-    font-size: 0.85rem;
-    color: #666;
-    background-color: #eee;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-  }
+      .art-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+      }
 
-  .mensagem-vazia {
-    text-align: center;
-    grid-column: 1 / -1;
-    color: #666;
-  }
-</style>
+      /* Efeito Zoom na Imagem */
+      .image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        overflow: hidden;
+        background-color: #eee;
+      }
+
+      .image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .art-card:hover .image-wrapper img {
+        transform: scale(1.08);
+      }
+
+      /* Overlay sutil ao passar o mouse */
+      .overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.25);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .art-card:hover .overlay {
+        opacity: 1;
+      }
+
+      /* Conteúdo do Card */
+      .card-content {
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-content h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        background: #f0f0f0;
+        color: var(--text-secondary);
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Modal Lightbox */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        max-height: 90vh;
+        background: #fff;
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      }
+
+      .modal-content img {
+        max-height: 75vh;
+        width: auto;
+        object-fit: contain;
+        background: #000;
+      }
+
+      .modal-caption {
+        padding: 20px;
+        background: #fff;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+
+    <!-- SCRIPT DE EXPANSÃO (ZOOM) -->
+    <script is:inline>
+      function openModal(imageSrc, title, style) {
+        document.getElementById('modal-img').src = imageSrc;
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-style').innerText = style;
+        document.getElementById('image-modal').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('image-modal').style.display = 'none';
+      }
+    </script>
+  </body>
+</html>

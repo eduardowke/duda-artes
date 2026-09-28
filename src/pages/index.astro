@@ -167,13 +167,13 @@ const artes = await getCollection('artes');
       }
 
       /* Conteúdo do Card */
-      .card-content {
+        .card-content {
         padding: 18px 20px;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column; /* Coloca os elementos um abaixo do outro */
+        align-items: flex-start;  /* Alinha título e estilo à esquerda */
+        gap: 8px;                /* Espaço entre o título e a tag */
       }
-
       .card-content h3 {
         font-size: 1.1rem;
         font-weight: 600;
@@ -185,7 +185,7 @@ const artes = await getCollection('artes');
         color: var(--text-secondary);
         padding: 4px 10px;
         border-radius: 20px;
-        text-transform: uppercase;
+        text-transform: none;
         letter-spacing: 0.5px;
       }
 
